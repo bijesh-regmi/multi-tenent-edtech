@@ -3,7 +3,6 @@ import sequelize from "../config/databse.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-
 const User = sequelize.define(
     "User",
     {
@@ -15,28 +14,27 @@ const User = sequelize.define(
 
         username: {
             type: DataTypes.STRING(30),
-            allowNull: false,//database level constrain, accepts username = ""
+            allowNull: false, //database level constrain, accepts username = ""
             unique: true,
             validate: {
                 //application level constrain, can check for username=""
-                len:[2,16]
+                len: [2, 16],
             },
         },
         password: {
             type: DataTypes.STRING(72),
             allowNull: false,
-            validate:{
-                len:[8,72]
-            }
+            validate: {
+                len: [8, 72],
+            },
         },
         email: {
             type: DataTypes.STRING(254),
             allowNull: false,
-            unique: true,
-            validate:{
-                notEmpty:true,
-                isEmail:true
-            }
+            validate: {
+                notEmpty: true,
+                isEmail: true,
+            },
         },
         userRole: {
             type: DataTypes.ENUM(
@@ -46,10 +44,25 @@ const User = sequelize.define(
                 "super-admin",
             ),
         },
+        instituteId: {
+            type: DataTypes.UUID,
+            allowNull: false,
+            references: {
+                model: "institutes",
+                key: "id",
+            },
+        },
+
         refreshToken: {
             type: DataTypes.STRING(500),
             allowNull: true,
         },
+    },
+    {
+        indexes: [
+            { unique: true, fields: ["username", "instituteId"] },
+            { unique: true, fields: ["email", "instituteId"] },
+        ],
     },
     {
         tableName: "users",
@@ -87,11 +100,12 @@ User.prototype.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
 
-User.prototype.generateAccessToken =  function () {
+User.prototype.generateAccessToken = function () {
     return jwt.sign(
         {
             id: this.id,
             role: this.userRole,
+            instituteId: this.instituteId,
         },
         process.env.ACCESS_TOKEN_SECRET_KEY,
         {
@@ -100,11 +114,12 @@ User.prototype.generateAccessToken =  function () {
     );
 };
 
-User.prototype.generateRefreshToken =  function () {
+User.prototype.generateRefreshToken = function () {
     return jwt.sign(
         {
             id: this.id,
             role: this.userRole,
+            instituteId: this.instituteId,
         },
         process.env.REFRESH_TOKEN_SECRET_KEY,
         {
