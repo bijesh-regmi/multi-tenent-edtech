@@ -43,27 +43,28 @@ const User = sequelize.define(
                 "institute",
                 "super-admin",
             ),
+            allowNull: true,
         },
-        instituteId: {
-            type: DataTypes.UUID,
-            allowNull: false,
-            references: {
-                model: "institutes",
-                key: "id",
-            },
-        },
+        // instituteId: {
+        //     type: DataTypes.UUID,
+        //     allowNull: false,
+        //     references: {
+        //         model: "institutes",
+        //         key: "id",
+        //     },
+        // },
 
         refreshToken: {
             type: DataTypes.STRING(500),
             allowNull: true,
         },
     },
-    {
-        indexes: [
-            { unique: true, fields: ["username", "instituteId"] },
-            { unique: true, fields: ["email", "instituteId"] },
-        ],
-    },
+    // {
+    //     indexes: [
+    //         { unique: true, fields: ["username", "instituteId"] },
+    //         { unique: true, fields: ["email", "instituteId"] },
+    //     ],
+    // },
     {
         tableName: "users",
         timestamps: true,

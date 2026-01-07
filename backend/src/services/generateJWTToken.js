@@ -1,4 +1,5 @@
-import { User } from "../models/user.model.js";
+import User from "../models/user.model.js";
+
 const generateJWTTokens = async (userId) => {
     try {
         const user = await User.findByPk(userId);
@@ -16,4 +17,4 @@ const generateJWTTokens = async (userId) => {
         );
     }
 };
-export default generateJWTTokens
+export default generateJWTTokensw
