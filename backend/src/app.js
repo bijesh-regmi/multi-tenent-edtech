@@ -1,9 +1,5 @@
 import express from "express";
-import helmet from "helmet";
-import cors from "cors";
 import authRouter from "./routes/global/auth.routes.js";
-import globalErrorHandler from "./middlewares/globalErrorHandler.middleware.js";
-import { generalLimiter } from "./middlewares/rateLimiter.middleware.js";
 import ApiError from "./utils/ApiError.js";
 
 const app = express();
@@ -34,7 +30,7 @@ app.use((req, res, next) => {
 });
 
 // Global Error Handler - Must be last middleware
-app.use(globalErrorHandler);
+// app.use(globalErrorHandler);
 
 // Handle unhandled promise rejections at the app level
 process.on('unhandledRejection', (reason, promise) => {

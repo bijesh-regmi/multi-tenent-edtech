@@ -1,7 +1,3 @@
-/**
- * Custom API Error Class
- * Provides consistent error structure across the application
- */
 class ApiError extends Error {
 
     constructor(

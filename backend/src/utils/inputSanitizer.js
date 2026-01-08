@@ -15,7 +15,7 @@ export const sanitizeUsername = (username) => {
 export const validUsername = (username) => {
     if (typeof username !== "string") return null;
     const userRegex = /^[a-zA-Z0-9_-]+$/;
-    return userRegex.text(username) ? username.toLowerCase() : null;
+    return userRegex.test(username) ? username.toLowerCase() : null;
 };
 
 export const sanitizeEmail = (email) => {

@@ -3,23 +3,23 @@ import sequelize from "../config/databse.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
-
-// * List of fields that are allowed for mass assignment during create/update
-const MASS_ASSIGNABLE_FIELDS = ['username', 'password', 'email'];
-// * List of fields that should never be set via user input
-const PROTECTED_FIELDS = ['id', 'userRole', 'refreshToken', 'createdAt', 'updatedAt'];
 const USERNAME_REGEX = /^[a-zA-Z0-9_-]+$/;
-
-
-const containsNoNullBytes = (value) => {
-    if (typeof value !== 'string') return true;
-    if (value.includes('\0')) {
-        throw new Error('Input cannot contain null bytes');
-    }
-    if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(value)) {
-        throw new Error('Input cannot contain control characters');
-    }
-    return true};
+// const PROTECTED_FIELDS = ["password","userRole","createdAt","updatedAt"]
+// const MASS_ASSIGNABLE_FIELDS= ["password","username","email"]
+const containsNoNullBytesAndSpecialChars = (username) => {
+    if (!typeof username === "string")
+        throw Error(
+            "Invalid input format: username contains illegal character",
+        );
+    if (username.includes("\0"))
+        throw Error(
+            "Invalid input format: username contains illegal character",
+        );
+    if (/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]/.test(username))
+        throw Error(
+            "Invalid input format: username contains illegal character",
+        );
+};
 
 const User = sequelize.define(
     "User",
@@ -35,42 +35,41 @@ const User = sequelize.define(
             allowNull: false,
             unique: true,
             validate: {
+                notEmpty: {
+                    msg: "Username cannot be empty",
+                },
                 len: {
-                    args: [2, 16],
-                    msg: 'Username must be between 2 and 16 characters',
+                    args: [5, 16],
+                    msg: "Username must be between 5 and 16 characters long. ",
                 },
-                // Only allow alphanumeric, underscore, and hyphen
                 isValidFormat(value) {
-                    if (!USERNAME_REGEX.test(value)) {
-                        throw new Error('Username can only contain letters, numbers, underscores, and hyphens');
-                    }
+                    if (!USERNAME_REGEX.text(value))
+                        throw Error(
+                            "Username can only contains characters, numbers, underscore and hyphens.",
+                        );
                 },
-                // Check for null bytes and control characters
-                noNullBytes(value) {
-                    containsNoNullBytes(value);
-                },
-                // Ensure it doesn't start or end with hyphen/underscore
-                validStartEnd(value) {
-                    if (/^[-_]|[-_]$/.test(value)) {
-                        throw new Error('Username cannot start or end with a hyphen or underscore');
-                    }
+                noNullByte(value) {
+                    containsNoNullBytesAndSpecialChars(value);
                 },
             },
         },
+
         password: {
             type: DataTypes.STRING(72),
             allowNull: false,
             validate: {
-                len: {
-                    args: [8, 72],
-                    msg: 'Password must be between 8 and 72 characters',
+                notEmpty: {
+                    msg: "password cannot be empty",
                 },
-                // Basic password strength check
+                len: {
+                    args: [8, 64],
+                    msg: "Password must be between 8 and 64 characters long.",
+                },
                 isStrong(value) {
-                    // At least one letter and one number
-                    if (!/[a-zA-Z]/.test(value) || !/[0-9]/.test(value)) {
-                        throw new Error('Password must contain at least one letter and one number');
-                    }
+                    if (!/[a-zA-Z]/.test(value) || !/[0-9]/.test(value))
+                        throw Error(
+                            "Password must contains at lest one character and one alphabet",
+                        );
                 },
             },
         },
@@ -80,14 +79,10 @@ const User = sequelize.define(
             unique: true,
             validate: {
                 notEmpty: {
-                    msg: 'Email cannot be empty',
+                    msg: "Email cannot be empty",
                 },
                 isEmail: {
-                    msg: 'Please provide a valid email address',
-                },
-                // Check for null bytes and control characters
-                noNullBytes(value) {
-                    containsNoNullBytes(value);
+                    msg: "Invalid email format",
                 },
             },
         },
@@ -100,13 +95,6 @@ const User = sequelize.define(
             ),
             allowNull: true,
             // Note: This field should NEVER be set from user input directly
-        },
-
-
-        refreshToken: {
-            type: DataTypes.STRING(500),
-            allowNull: true,
-            // Note: this field should never be set from user input directly
         },
     },
     {
@@ -140,35 +128,32 @@ const User = sequelize.define(
     },
 );
 
-// Static method to get mass assignable fields
-User.getMassAssignableFields = () => MASS_ASSIGNABLE_FIELDS;
-
-// Static method to get protected fields
-User.getProtectedFields = () => PROTECTED_FIELDS;
+// User.getMassAssignableFields =()=> MASS_ASSIGNABLE_FIELDS
+// User.getProtectedFields=()=> PROTECTED_FIELDS
 
 // Static method for safe create (with field restriction)
-User.safeCreate = async function (data) {
-    // Only allow mass-assignable fields
-    const safeData = {};
-    for (const field of MASS_ASSIGNABLE_FIELDS) {
-        if (data.hasOwnProperty(field)) {
-            safeData[field] = data[field];
-        }
-    }
-    return this.create(safeData, { fields: MASS_ASSIGNABLE_FIELDS });
-};
+// User.safeCreate = async function (data) {
+//     // Only allow mass-assignable fields
+//     const safeData = {};
+//     for (const field of MASS_ASSIGNABLE_FIELDS) {
+//         if (data.hasOwnProperty(field)) {
+//             safeData[field] = data[field];
+//         }
+//     }
+//     return this.create(safeData, { fields: MASS_ASSIGNABLE_FIELDS });
+// };
 
-User.safeUpdate = async function (instance, data) {
-    // Only allow mass-assignable fields
-    const safeData = {};
-    for (const field of MASS_ASSIGNABLE_FIELDS) {
-        if (data.hasOwnProperty(field)) {
-            safeData[field] = data[field];
-        }
-    }
-    return instance.update(safeData, { fields: MASS_ASSIGNABLE_FIELDS });
-};
-
+// User.safeUpdate = async function (instance, data) {
+//     // Only allow mass-assignable fields
+//     const safeData = {};
+//     for (const field of MASS_ASSIGNABLE_FIELDS) {
+//         if (data.hasOwnProperty(field)) {
+//             safeData[field] = data[field];
+//             j;
+//         }
+//     }
+//     return instance.update(safeData, { fields: MASS_ASSIGNABLE_FIELDS });
+// };
 User.prototype.isPasswordCorrect = async function (password) {
     return await bcrypt.compare(password, this.password);
 };
