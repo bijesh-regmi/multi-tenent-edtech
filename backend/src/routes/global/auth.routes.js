@@ -1,12 +1,14 @@
 import {
     signup,
+    login
 } from "../../controllers/global/auth.controller.js";
 import { Router } from "express";
 
 const router = Router();
 
 router.route("/signup").post(signup);
-
+//protected routes
+router.route("/login").get(login)
 // // Signup - Rate limited (5/hour), input whitelisted
 // router.route("/signup")
 //     .post(

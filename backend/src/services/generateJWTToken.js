@@ -17,4 +17,4 @@ const generateJWTTokens = async (userId) => {
         );
     }
 };
-export default generateJWTTokensw
+export default generateJWTTokens

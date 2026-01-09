@@ -96,6 +96,11 @@ const User = sequelize.define(
             allowNull: true,
             // Note: This field should NEVER be set from user input directly
         },
+        refreshToken: {
+            type: DataTypes.STRING,
+            allowNull: true,
+            unique: true,
+        },
     },
     {
         tableName: "users",
