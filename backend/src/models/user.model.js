@@ -168,7 +168,6 @@ User.prototype.generateAccessToken = function () {
         {
             id: this.id,
             role: this.userRole,
-            instituteId: this.instituteId,
         },
         process.env.ACCESS_TOKEN_SECRET_KEY,
         {
@@ -182,7 +181,6 @@ User.prototype.generateRefreshToken = function () {
         {
             id: this.id,
             role: this.userRole,
-            instituteId: this.instituteId,
         },
         process.env.REFRESH_TOKEN_SECRET_KEY,
         {

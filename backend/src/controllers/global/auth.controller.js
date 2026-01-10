@@ -2,6 +2,7 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import ApiError from "../../utils/ApiError.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import User from "../../models/user.model.js";
+import { Op } from "sequelize";
 import {
     sanitizeUsername,
     sanitizeEmail,
@@ -30,46 +31,55 @@ export const signup = asyncHandler(async (req, res) => {
 
     // Use safe create method with explicit field restriction
     // This prevents mass assignment attacks
-    const newUser = await User.create({
-        username: sanitizedUsername,
-        password,
-        email: sanitizedEmail,
-    });
+    try {
+        const newUser = await User.create({
+            username: sanitizedUsername,
+            password,
+            email: sanitizedEmail,
+        });
 
-    // Fetch user without sensitive fields
-    const user = await User.findByPk(newUser.id, {
-        attributes: ["id", "username", "email", "createdAt"],
-    });
+        // Fetch user without sensitive fields
+
+        const user = await User.findByPk(newUser.id, {
+            attributes: ["id", "username", "email", "createdAt"],
+        });
+    } catch (error) {}
 
     res.status(201).json(
         new ApiResponse(201, { user }, "User created successfully."),
     );
 });
 
-export const login = asyncHandler(async (res, res) => {
-    if (!req.body) throw new ApiError(400, "Not data is provided!");
+export const login = asyncHandler(async (req, res) => {
     const { identifier, password } = req.body;
     if (!identifier || !password)
         throw new ApiError(400, "All fields are required.");
+
     const user = await User.findOne({
         where: {
-            identifier,
+            [Op.or]: [{ email: identifier }, { username: identifier }],
         },
     });
-    if (!user) throw new ApiError(400, "Invalid credentials");
+    if (!user || !(await user.isValidPassword(password)))
+        throw new ApiError(401, "Invalid credentials");
 
-    const isValidPassword = await user.isValidPassword(password);
+    const { accessToken, refreshToken } = await generateJWTTokens(user);
 
-    if (!isValidPassword) throw new ApiError(400, "Invalid credentials");
-    const { accessToken, refreshToken } = await generateJWTTokens(user.id);
-    const loggedInUser = await User.findByPk(user.id, {
-        attributes: {
-            exclude: ["password", "refreshToken"],
-        },
-    });
+    const { password: _, refreshToken: __, ...safeUser } = user.toJSON();
+    const cookieOptions = {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+    };
     return res
         .status(200)
-        .cookie("accessToken", accessToken, { httpOnly: true })
-        .cookie("refreshToken", refreshToken,{httpOnly:true})
-        .json(new ApiResponse(200,{loggedInUser}, "LogIn successful."))
+        .cookie("accessToken", accessToken, {
+            ...cookieOptions,
+            maxAge: 30 * 60 * 1000,
+        })
+        .cookie("refreshToken", refreshToken, {
+            ...cookieOptions,
+            maxAge: 7 * 24 * 60 * 60 * 1000,
+        })
+        .json(new ApiResponse(200, { ...safeUser }, "LogIn successful."));
 });
