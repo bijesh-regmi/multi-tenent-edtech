@@ -3,3 +3,4 @@ node_modules
 .prettierignore
 .prettierrc
 USAGE_GUIDE.md
+TODO.txt

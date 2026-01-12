@@ -29,21 +29,16 @@ export const signup = asyncHandler(async (req, res) => {
     const sanitizedUsername = sanitizeUsername(username);
     const sanitizedEmail = sanitizeEmail(email);
 
-    // Use safe create method with explicit field restriction
-    // This prevents mass assignment attacks
-    try {
-        const newUser = await User.create({
-            username: sanitizedUsername,
-            password,
-            email: sanitizedEmail,
-        });
+    //TODO: safe create 
+    const newUser = await User.create({
+        username: sanitizedUsername,
+        password,
+        email: sanitizedEmail,
+    });
 
-        // Fetch user without sensitive fields
-
-        const user = await User.findByPk(newUser.id, {
-            attributes: ["id", "username", "email", "createdAt"],
-        });
-    } catch (error) {}
+    const user = await User.findByPk(newUser.id, {
+        attributes: ["id", "username", "email", "createdAt"],
+    });
 
     res.status(201).json(
         new ApiResponse(201, { user }, "User created successfully."),
@@ -60,7 +55,7 @@ export const login = asyncHandler(async (req, res) => {
             [Op.or]: [{ email: identifier }, { username: identifier }],
         },
     });
-    if (!user || !(await user.isValidPassword(password)))
+    if (!user || !(await user.confirmPassword(password)))
         throw new ApiError(401, "Invalid credentials");
 
     const { accessToken, refreshToken } = await generateJWTTokens(user);
@@ -83,3 +78,5 @@ export const login = asyncHandler(async (req, res) => {
         })
         .json(new ApiResponse(200, { ...safeUser }, "LogIn successful."));
 });
+
+
