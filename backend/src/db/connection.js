@@ -1,4 +1,4 @@
-import  sequelize  from "../config/databse.js";
+import  sequelize  from "../config/database.js";
 import "../models/user.model.js"; //necessary for association
 
 export const connectDB = async () => {

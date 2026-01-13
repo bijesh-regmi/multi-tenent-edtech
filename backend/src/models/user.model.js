@@ -1,5 +1,5 @@
 import { Model, DataTypes } from "sequelize";
-import sequelize from "../config/database";
+import sequelize from "../config/database.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -27,11 +27,10 @@ class User extends Model {
         return await bcrypt.compare(password, this.password);
     }
 
-    generateAccessToken() {
-        return jwt.sign(
+     generateAccessToken() {
+        return  jwt.sign(
             {
                 id: this.id,
-                role: this.userRole,
             },
             process.env.ACCESS_TOKEN_SECRET_KEY,
             {
@@ -43,7 +42,6 @@ class User extends Model {
         return jwt.sign(
             {
                 id: this.id,
-                role: this.userRole,
             },
             process.env.REFRESH_TOKEN_SECRET_KEY,
             {
@@ -51,8 +49,6 @@ class User extends Model {
             },
         );
     }
-
-    
 }
 
 User.init(
@@ -126,6 +122,7 @@ User.init(
                 "institute",
                 "super-admin",
             ),
+            defaultValue:"student",
             allowNull: true,
             // Note: This field should NEVER be set from user input directly
         },
@@ -138,7 +135,6 @@ User.init(
         sequelize,
         tableName: "users",
         modelName: "User",
-        paranoid: true,
         timestamps: true,
         hooks: {
             beforeCreate: async (user) => {
@@ -167,3 +163,5 @@ User.init(
         },
     },
 );
+
+export default User

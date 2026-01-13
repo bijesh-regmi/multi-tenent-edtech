@@ -29,11 +29,12 @@ export const signup = asyncHandler(async (req, res) => {
     const sanitizedUsername = sanitizeUsername(username);
     const sanitizedEmail = sanitizeEmail(email);
 
-    //TODO: safe create 
+    //TODO: safe create
     const newUser = await User.create({
         username: sanitizedUsername,
-        password,
+        password:password,
         email: sanitizedEmail,
+        userRole:"student"
     });
 
     const user = await User.findByPk(newUser.id, {
@@ -55,10 +56,10 @@ export const login = asyncHandler(async (req, res) => {
             [Op.or]: [{ email: identifier }, { username: identifier }],
         },
     });
-    if (!user || !(await user.confirmPassword(password)))
+    if (!user || !(await user.comparePassword(password)))
         throw new ApiError(401, "Invalid credentials");
 
-    const { accessToken, refreshToken } = await generateJWTTokens(user);
+    const { accessToken, refreshToken } = await generateJWTTokens(user.id);
 
     const { password: _, refreshToken: __, ...safeUser } = user.toJSON();
     const cookieOptions = {
@@ -80,3 +81,6 @@ export const login = asyncHandler(async (req, res) => {
 });
 
 
+export const refreshToken = asyncHandler(async (req, res) => {});
+export const forgetPassowrd = asyncHandler(async (req, res) => {});
+export const resetPassword = asyncHandler(async (req, res) => {});

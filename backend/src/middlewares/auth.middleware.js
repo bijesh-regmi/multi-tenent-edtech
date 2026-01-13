@@ -1,26 +1,27 @@
 import jwt from "jsonwebtoken";
-import asyncHandler from "../utils/asyncHandler";
-import User from "../models/user.model";
+import asyncHandler from "../utils/asyncHandler.js";
+import User from "../models/user.model.js";
 
 export const authenticate = asyncHandler(async (req, res, next) => {
     const accessToken =
         req?.cookies?.accessToken ||
-        req?.headers?.authorization?.startsWith("Bearer")
+        (req?.headers?.authorization?.startsWith("Bearer")
             ? req.headers.authorization.split(" ")[1]
-            : null;
+            : null);
     if (!accessToken) throw new ApiError(401, "Access Token is required");
+    let decodedToken;
     try {
-        const decodedToken = jwt.verify(
+        decodedToken = jwt.verify(
             accessToken,
             process.env.ACCESS_TOKEN_SECRET_KEY,
         );
     } catch (error) {
-        if (error === "TokenExpireError")
+        if ((error, name === "TokenExpireError"))
             throw new ApiError(401, "Expired access token");
         throw new ApiError(401, "Invalid access token");
     }
 
-    const user = User.findByPk(decodedToken.id, {
+    const user = await User.findByPk(decodedToken.id, {
         attributes: ["id", "username", "email", "userRole"],
     });
     if (!user) throw new ApiError(401, "User not found");

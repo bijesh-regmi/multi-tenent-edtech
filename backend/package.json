@@ -2,14 +2,14 @@
   "name": "multi-tenent",
   "version": "1.0.0",
   "description": "",
-  "main": "src/server.js",
+  "keywords": [],
+  "license": "MIT",
+  "author": "",
   "type": "module",
+  "main": "src/server.js",
   "scripts": {
     "start": "node --watch --env-file=.env src/server.js"
   },
-  "keywords": [],
-  "author": "",
-  "license": "MIT",
   "dependencies": {
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
