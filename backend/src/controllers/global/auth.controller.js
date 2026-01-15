@@ -13,9 +13,8 @@ import generateJWTTokens from "../../services/generateJWTToken.js";
 
 export const signup = asyncHandler(async (req, res) => {
     if (!req.body) throw new ApiError(400, "No data provided.");
-
     const { email, username, password, confirmPassword } = req.body;
-
+    
     if (
         [email, username, password, confirmPassword].some(
             (field) => !field || String(field).trim() === "",
@@ -29,19 +28,19 @@ export const signup = asyncHandler(async (req, res) => {
     const sanitizedUsername = sanitizeUsername(username);
     const sanitizedEmail = sanitizeEmail(email);
 
+    console.log("4th")
     //TODO: safe create
     const newUser = await User.create({
         username: sanitizedUsername,
         password:password,
         email: sanitizedEmail,
-        userRole:"student"
     });
 
     const user = await User.findByPk(newUser.id, {
         attributes: ["id", "username", "email", "createdAt"],
     });
 
-    res.status(201).json(
+    return res.status(201).json(
         new ApiResponse(201, { user }, "User created successfully."),
     );
 });
@@ -60,12 +59,13 @@ export const login = asyncHandler(async (req, res) => {
         throw new ApiError(401, "Invalid credentials");
 
     const { accessToken, refreshToken } = await generateJWTTokens(user.id);
+    
 
-    const { password: _, refreshToken: __, ...safeUser } = user.toJSON();
+    const { password: _, refreshToken: __,userRole:___, ...safeUser } = user.toJSON();
     const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
+        // sameSite: "lax",
     };
     return res
         .status(200)

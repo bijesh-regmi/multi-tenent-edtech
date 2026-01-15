@@ -1,10 +1,10 @@
 import sequelize from "../config/database.js";
-import generateInstituteId from "../utils/instituteNumberGenerater.js";
+import generateInstituteId from "../utils/instituteNumberGenerator.js";
 import { QueryTypes } from "sequelize";
 
-const createInstituteTable = async () => {
-    const isntituteNumber = generateInstituteId();
-    const tableName = `institute_${isntituteNumber}`;
+export const createInstituteTable = async () => {
+    const instituteNumber = generateInstituteId();
+    const tableName = `institute_${instituteNumber}`;
 
     const query = `
         CREATE TABLE IF NOT EXISTS ${tableName} (
@@ -24,7 +24,15 @@ const createInstituteTable = async () => {
 
     await sequelize.query(query, { type: QueryTypes.RAW });
 
-    return tableName;
+    return {tableName,instituteNumber};
 };
 
-export default createInstituteTable;
+export const createTeacherTable  = async()=>{
+
+}
+export const createCourseTable = async ()=>{
+
+}
+export const createStudentTable = async ()=>{
+    
+}

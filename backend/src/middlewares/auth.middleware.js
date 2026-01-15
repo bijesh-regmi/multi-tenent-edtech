@@ -1,5 +1,6 @@
 import jwt from "jsonwebtoken";
 import asyncHandler from "../utils/asyncHandler.js";
+import ApiError from "../utils/ApiError.js";
 import User from "../models/user.model.js";
 
 export const authenticate = asyncHandler(async (req, res, next) => {
@@ -16,16 +17,23 @@ export const authenticate = asyncHandler(async (req, res, next) => {
             process.env.ACCESS_TOKEN_SECRET_KEY,
         );
     } catch (error) {
-        if ((error, name === "TokenExpireError"))
+        if (error.name === "TokenExpireError")
             throw new ApiError(401, "Expired access token");
         throw new ApiError(401, "Invalid access token");
     }
 
     const user = await User.findByPk(decodedToken.id, {
-        attributes: ["id", "username", "email", "userRole"],
+        attributes: [
+            "id",
+            "username",
+            "email",
+            "role",
+            "currentInstituteNumber",
+        ],
     });
     if (!user) throw new ApiError(401, "User not found");
     req.user = user;
     req.userId = user.id;
+    console.log("authentication successful")
     next();
 });

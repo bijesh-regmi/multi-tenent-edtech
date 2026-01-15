@@ -2,7 +2,7 @@ import express from "express";
 import authRouter from "./routes/global/auth.routes.js";
 import instituteRoute from "./routes/institute/institute.route.js"
 import ApiError from "./utils/ApiError.js";
-
+import cookieParser from "cookie-parser"
 const app = express();
 
 // Security Headers (Helmet)
@@ -10,19 +10,16 @@ const app = express();
 // General Rate Limiting (applies to all routes)
 // app.use(generalLimiter);
 
+app.use(cookieParser())
 
 app.use(express.json({ limit: '10kb' })); // Limit body size for security
 app.use(express.urlencoded({ extended: true, limit: '10kb' }));
 console.log("hello")
 // API Routes
-app.use("/api/v1/user", authRouter);
+console.log("1st")
+app.use("/api/v1/users", authRouter);
 app.use("/api/v1/institute",instituteRoute)
 
-app.get("/hello",(req,res)=>{
-
-    console.log("hello")
-    res.status(200).json("hello")
-})
 
 
 

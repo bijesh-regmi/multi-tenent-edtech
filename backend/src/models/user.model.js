@@ -115,7 +115,7 @@ User.init(
                 },
             },
         },
-        userRole: {
+        role: {
             type: DataTypes.ENUM(
                 "teacher",
                 "student",
@@ -123,8 +123,11 @@ User.init(
                 "super-admin",
             ),
             defaultValue:"student",
-            allowNull: true,
             // Note: This field should NEVER be set from user input directly
+        },
+        currentInstituteNumber:{
+            type:DataTypes.STRING,
+            allowNull:true,
         },
         refreshToken: {
             type: DataTypes.STRING,

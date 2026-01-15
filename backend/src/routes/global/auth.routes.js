@@ -6,6 +6,7 @@ import { Router } from "express";
 import { authenticate } from "../../middlewares/auth.middleware.js";
 const router = Router();
 
+console.log("2nd")
 router.route("/signup").post(signup);
 //protected routes
 router.route("/login").get(login)
