@@ -3,7 +3,11 @@ import bcrypt from "bcrypt";
 import ApiError from "../utils/ApiError.js";
 const generateJWTTokens = async (userId) => {
     try {
-        const user = await User.findByPk(userId);
+        const user = await User.findOne({
+            where:{
+                publicId:userId
+            }
+        });
         const accessToken = user.generateAccessToken();
         const refreshToken = user.generateRefreshToken();
         //save the refresh token in the user

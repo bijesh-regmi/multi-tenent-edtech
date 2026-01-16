@@ -28,7 +28,6 @@ export const signup = asyncHandler(async (req, res) => {
     const sanitizedUsername = sanitizeUsername(username);
     const sanitizedEmail = sanitizeEmail(email);
 
-    console.log("4th")
     //TODO: safe create
     const newUser = await User.create({
         username: sanitizedUsername,
@@ -37,7 +36,7 @@ export const signup = asyncHandler(async (req, res) => {
     });
 
     const user = await User.findByPk(newUser.id, {
-        attributes: ["id", "username", "email", "createdAt"],
+        attributes: ["publicId", "username", "email", "createdAt"],
     });
 
     return res.status(201).json(
@@ -57,15 +56,14 @@ export const login = asyncHandler(async (req, res) => {
     });
     if (!user || !(await user.comparePassword(password)))
         throw new ApiError(401, "Invalid credentials");
-
-    const { accessToken, refreshToken } = await generateJWTTokens(user.id);
+    const { accessToken, refreshToken } = await generateJWTTokens(user.publicId);
     
 
-    const { password: _, refreshToken: __,userRole:___, ...safeUser } = user.toJSON();
+    const { password: _, refreshToken: __,userRole:___, id:____, ...safeUser } = user.toJSON();
     const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
-        // sameSite: "lax",
+        sameSite: "lax",
     };
     return res
         .status(200)

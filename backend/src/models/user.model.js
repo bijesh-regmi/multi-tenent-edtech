@@ -1,4 +1,4 @@
-import { Model, DataTypes } from "sequelize";
+import { Model, DataTypes, UUIDV4 } from "sequelize";
 import sequelize from "../config/database.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
@@ -30,7 +30,7 @@ class User extends Model {
      generateAccessToken() {
         return  jwt.sign(
             {
-                id: this.id,
+                sub: this.publicId,
             },
             process.env.ACCESS_TOKEN_SECRET_KEY,
             {
@@ -41,7 +41,7 @@ class User extends Model {
     generateRefreshToken() {
         return jwt.sign(
             {
-                id: this.id,
+                sub: this.publicId,
             },
             process.env.REFRESH_TOKEN_SECRET_KEY,
             {
@@ -54,11 +54,19 @@ class User extends Model {
 User.init(
     {
         id: {
-            type: DataTypes.UUID,
-            defaultValue: DataTypes.UUIDV4,
+            type: DataTypes.INTEGER,
+            autoIncrement:true,
             primaryKey: true,
+            unique:true
         },
-
+        publicId:{
+            type: DataTypes.UUID,
+            defaultValue:UUIDV4,
+            allowNull:false,
+            unique:true,
+            field:"public_id"
+        }
+,
         username: {
             type: DataTypes.STRING(30),
             allowNull: false,
@@ -123,7 +131,6 @@ User.init(
                 "super-admin",
             ),
             defaultValue:"student",
-            // Note: This field should NEVER be set from user input directly
         },
         currentInstituteNumber:{
             type:DataTypes.STRING,

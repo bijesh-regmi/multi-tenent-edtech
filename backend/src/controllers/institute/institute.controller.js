@@ -6,8 +6,12 @@ import sequelize from "../../config/database.js";
 import {
     createInstituteTable,
     createTeacherTable,
+    createUserInstituteTable,
 } from "../../services/createInstituteTables.js";
-import insertIntoInstituteTable from "../../services/insertIntoInstituteTable.js";
+import {
+    insertIntoInstituteTable,
+    insertIntoUserInstituteTable,
+} from "../../services/insertIntoInstituteTables.js";
 import { QueryTypes, Transaction } from "sequelize";
 
 export const createInstitute = asyncHandler(async (req, res, next) => {
@@ -30,43 +34,26 @@ export const createInstitute = asyncHandler(async (req, res, next) => {
         throw new ApiError(400, "All fields are required");
     }
     //create institute table
-    const { tableName, instituteNumber } = await createInstituteTable();
-    //insert data to the institute table
-    await insertIntoInstituteTable({
-        tableName,
-        instituteName,
+    const { instituteNumber } = await createInstituteTable(instituteName,
         instituteEmail,
         institutePhoneNumber,
         instituteAddress,
         vatNumber,
-        panNumber,
-    });
+        panNumber,);
     console.log("Institute table created and data entered successful");
 
+    //put instituteNumber in the req object to be used in next controller
     req.instituteNumber = instituteNumber;
     if (!req.user)
         throw new ApiError(
             500,
             "Unable to perform this action, user not allowed",
         );
-    console.log("hiiiii");
+
     //create a a user_institute table to track the institutes created by the user
-    await sequelize.query(
-        `
-        CREATE TABLE IF NOT EXISTS user_institute(
-        id INT NOT NULL PRIMARY KEY AUTO_INCREMENT,
-        userId VARCHAR(255) NOT NULL REFERENCES users(id),
-        instituteNumber INT  UNIQUE
-        )
-        `,
-    );
-    await sequelize.query(
-        `INSERT INTO user_institute(userId,instituteNumber) VALUES(?,?)`,
-        {
-            replacements: [req.user.id, instituteNumber],
-        },
-    );
-    //update the user with current institute number and set the role to institute
+    await createUserInstituteTable(req.user.id, instituteNumber);
+
+    // update the user with current institute number and set the role to institute
     await User.update(
         {
             currentInstituteNumber: instituteNumber,
@@ -78,8 +65,6 @@ export const createInstitute = asyncHandler(async (req, res, next) => {
             },
         },
     );
-
-    console.log("hahahuhu");
     res.status(200).json("success");
 });
 

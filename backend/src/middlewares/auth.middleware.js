@@ -22,18 +22,21 @@ export const authenticate = asyncHandler(async (req, res, next) => {
         throw new ApiError(401, "Invalid access token");
     }
 
-    const user = await User.findByPk(decodedToken.id, {
-        attributes: [
-            "id",
-            "username",
-            "email",
-            "role",
-            "currentInstituteNumber",
-        ],
+    const user = await User.findOne({
+        where:{
+            publicId: decodedToken.sub
+        },
+        attributes:[[
+    "id",        // internal INT
+    "publicId",  // UUID
+    "username",
+    "email",
+    "role",
+    "currentInstituteNumber",
+  ],]
     });
     if (!user) throw new ApiError(401, "User not found");
     req.user = user;
-    req.userId = user.id;
     console.log("authentication successful")
     next();
 });
