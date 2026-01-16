@@ -36,7 +36,7 @@ export const signup = asyncHandler(async (req, res) => {
     });
 
     const user = await User.findByPk(newUser.id, {
-        attributes: ["publicId", "username", "email", "createdAt"],
+        attributes: ["id", "username", "email", "createdAt"],
     });
 
     return res.status(201).json(
@@ -56,10 +56,10 @@ export const login = asyncHandler(async (req, res) => {
     });
     if (!user || !(await user.comparePassword(password)))
         throw new ApiError(401, "Invalid credentials");
-    const { accessToken, refreshToken } = await generateJWTTokens(user.publicId);
+    const { accessToken, refreshToken } = await generateJWTTokens(user.id);
     
 
-    const { password: _, refreshToken: __,userRole:___, id:____, ...safeUser } = user.toJSON();
+    const { password: _, refreshToken: __,userRole:___,  ...safeUser } = user.toJSON();
     const cookieOptions = {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",

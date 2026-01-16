@@ -30,7 +30,7 @@ class User extends Model {
      generateAccessToken() {
         return  jwt.sign(
             {
-                sub: this.publicId,
+                sub: this.id,
             },
             process.env.ACCESS_TOKEN_SECRET_KEY,
             {
@@ -41,7 +41,7 @@ class User extends Model {
     generateRefreshToken() {
         return jwt.sign(
             {
-                sub: this.publicId,
+                sub: this.id,
             },
             process.env.REFRESH_TOKEN_SECRET_KEY,
             {
@@ -54,19 +54,11 @@ class User extends Model {
 User.init(
     {
         id: {
-            type: DataTypes.INTEGER,
-            autoIncrement:true,
+            type: DataTypes.UUID,
+            defaultValue:UUIDV4,
             primaryKey: true,
             unique:true
         },
-        publicId:{
-            type: DataTypes.UUID,
-            defaultValue:UUIDV4,
-            allowNull:false,
-            unique:true,
-            field:"public_id"
-        }
-,
         username: {
             type: DataTypes.STRING(30),
             allowNull: false,

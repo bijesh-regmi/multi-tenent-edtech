@@ -5,14 +5,11 @@ import User from "../../models/user.model.js";
 import sequelize from "../../config/database.js";
 import {
     createInstituteTable,
-    createTeacherTable,
     createUserInstituteTable,
+    createInstituteTeacherTable,
+    createInstituteStudentTable,
+    createInstituteCourseTable,
 } from "../../services/createInstituteTables.js";
-import {
-    insertIntoInstituteTable,
-    insertIntoUserInstituteTable,
-} from "../../services/insertIntoInstituteTables.js";
-import { QueryTypes, Transaction } from "sequelize";
 
 export const createInstitute = asyncHandler(async (req, res, next) => {
     const {
@@ -34,16 +31,16 @@ export const createInstitute = asyncHandler(async (req, res, next) => {
         throw new ApiError(400, "All fields are required");
     }
     //create institute table
-    const { instituteNumber } = await createInstituteTable(instituteName,
+    const { instituteNumber } = await createInstituteTable(
+        instituteName,
         instituteEmail,
         institutePhoneNumber,
         instituteAddress,
         vatNumber,
-        panNumber,);
+        panNumber,
+    );
     console.log("Institute table created and data entered successful");
 
-    //put instituteNumber in the req object to be used in next controller
-    req.instituteNumber = instituteNumber;
     if (!req.user)
         throw new ApiError(
             500,
@@ -65,10 +62,24 @@ export const createInstitute = asyncHandler(async (req, res, next) => {
             },
         },
     );
-    res.status(200).json("success");
+
+    req.currentInstituteNumber = instituteNumber;
+    res.send("success");
+    // next();
 });
 
-export const createTeacher = asyncHandler(async (req, res) => {
-    await createTeacherTable();
-    res.status(200).json("success");
+export const createTeacher = asyncHandler(async (req, res, next) => {
+    await createInstituteTeacherTable(req.currentInstituteNumber);
+    next();
 });
+export const createStudent = asyncHandler(async (req, res, next) => {
+    await createInstituteStudentTable(req.currentInstituteNumber);
+    next();
+});
+export const createCourse = asyncHandler(async (req, res, next) => {
+
+    await createInstituteCourseTable(req.currentInstituteNumber)
+    next()
+});
+
+export const create

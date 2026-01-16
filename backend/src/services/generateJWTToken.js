@@ -5,7 +5,7 @@ const generateJWTTokens = async (userId) => {
     try {
         const user = await User.findOne({
             where:{
-                publicId:userId
+                id:userId
             }
         });
         const accessToken = user.generateAccessToken();
