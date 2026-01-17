@@ -6,12 +6,15 @@ import sequelize from "../../config/database.js";
 import {
     createInstituteTable,
     createUserInstituteTable,
+    createInstituteCategoryTable,
     createInstituteTeacherTable,
+    createInstituteChapterTable,
     createInstituteStudentTable,
     createInstituteCourseTable,
 } from "../../services/createInstituteTables.js";
 
-export const createInstitute = asyncHandler(async (req, res, next) => {
+/* ================= INSTITUTE ================= */
+export const createInstitute = async (req, res, next) => {
     const {
         instituteName,
         instituteEmail,
@@ -39,18 +42,9 @@ export const createInstitute = asyncHandler(async (req, res, next) => {
         vatNumber,
         panNumber,
     );
-    console.log("Institute table created and data entered successful");
-
-    if (!req.user)
-        throw new ApiError(
-            500,
-            "Unable to perform this action, user not allowed",
-        );
-
-    //create a a user_institute table to track the institutes created by the user
+    if (!instituteNumber) throw new ApiError(500, "Institute creation failed!");
+    //create user_institute table
     await createUserInstituteTable(req.user.id, instituteNumber);
-
-    // update the user with current institute number and set the role to institute
     await User.update(
         {
             currentInstituteNumber: instituteNumber,
@@ -64,22 +58,49 @@ export const createInstitute = asyncHandler(async (req, res, next) => {
     );
 
     req.currentInstituteNumber = instituteNumber;
-    res.send("success");
-    // next();
-});
-
-export const createTeacher = asyncHandler(async (req, res, next) => {
-    await createInstituteTeacherTable(req.currentInstituteNumber);
     next();
-});
-export const createStudent = asyncHandler(async (req, res, next) => {
-    await createInstituteStudentTable(req.currentInstituteNumber);
+};
+
+/* ================= CATEGORY ================= */
+export const createInstituteCategory = async (req, res, next) => {
+    const { instituteNumber } = req;
+    await createInstituteCategoryTable(instituteNumber);
     next();
-});
-export const createCourse = asyncHandler(async (req, res, next) => {
+};
 
-    await createInstituteCourseTable(req.currentInstituteNumber)
-    next()
-});
 
-export const create
+/* ================= TEACHER ================= */
+export const createInstituteTeacher = async (req, res, next) => {
+    const { instituteNumber } = req;
+    await createInstituteTeacherTable(instituteNumber);
+    next();
+};
+
+
+/* ================= COURSE ================= */
+export const createInstituteCourse = async (req, res, next) => {
+    const { instituteNumber } = req;
+    await createInstituteCourseTable(instituteNumber);
+    next();
+};
+
+/* ================= COURSE CHAPTER ================= */
+export const createInstituteChapter = async (req, res, next) => {
+    const { instituteNumber } = req;
+    await createInstituteChapterTable(instituteNumber);
+    next();
+};
+
+/* ================= CHAPTER LESSON ================= */
+export const createInstituteLesson = async (req, res, next) => {
+    const { instituteNumber } = req;
+    await createInstituteTeacherTable(instituteNumber);
+    next();
+};
+
+/* ================= STUDENT ================= */
+export const createInstituteStudent = async (req, res, next) => {
+    const { instituteNumber } = req;
+    await createInstituteStudentTable(instituteNumber);
+    next();
+};
