@@ -29,12 +29,12 @@ export const createInstituteTable = async (
     `;
     await sequelize.query(createQuery, { type: QueryTypes.RAW });
     const insertQuery = `INSERT  INTO ${tableName} (  
-            name,
-            email,
-            phone_number,
-            address,
-            vatNumber,
-            panNumber) VALUES (
+            instituteName,
+            instituteEmail,
+            institutePhoneNumber,
+            instituteAddress,
+            institutePanNo,
+            instituteVatNo) VALUES (
             ?,?,?,?,?,?
         )`;
     await sequelize.query(insertQuery, {
@@ -53,7 +53,7 @@ export const createInstituteTable = async (
 
 export const createUserInstituteTable = async (userId, instituteNumber) => {
     try {
-        const createQuery = `CREATE TABLE IF NOT EXISTS user_institutes (
+        const createQuery = `CREATE TABLE IF NOT EXISTS user_institute (
             id INT NOT NULL AUTO_INCREMENT PRIMARY KEY,
             userId CHAR(36) CHARACTER SET utf8mb4 COLLATE utf8mb4_bin NOT NULL,
             instituteNumber INT NOT NULL,
@@ -66,15 +66,10 @@ export const createUserInstituteTable = async (userId, instituteNumber) => {
             ) ENGINE=InnoDB`;
         await sequelize.query(createQuery);
         const insertQuery = `INSERT INTO user_institutes(userId,instituteNumber) VALUES(?,?)`;
-        await sequelize.query(
-            insertQuery,
-            {
-                replacements: [userId, instituteNumber],
-            },
-            {
-                type: QueryTypes.INSERT,
-            },
-        );
+        await sequelize.query(insertQuery, {
+            replacements: [userId, instituteNumber],
+            type: QueryTypes.INSERT,
+        });
     } catch (error) {
         console.log(
             "WARNING!WARNING! ERROR ALERT XXX! user institute junction failed!",
@@ -83,7 +78,7 @@ export const createUserInstituteTable = async (userId, instituteNumber) => {
     }
 };
 
-export const createInstituteCategoryTable = async (instituteNumber) => {
+export const createCategoryTable = async (instituteNumber) => {
     const query = `
       CREATE TABLE IF NOT EXISTS category_${instituteNumber} (
       id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
@@ -98,10 +93,10 @@ export const createInstituteCategoryTable = async (instituteNumber) => {
     });
 };
 
-export const createInstituteTeacherTable = async (instituteNumber) => {
+export const createTeacherTable = async (instituteNumber) => {
     try {
         const query = `
-        CREATE TABLE IF NOT EXISTS teachers_${instituteNumber} (
+        CREATE TABLE IF NOT EXISTS teacher_${instituteNumber} (
             id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
             teacherName VARCHAR(255) NOT NULL,
             teacherEmail VARCHAR(255) NOT NULL UNIQUE,
@@ -111,12 +106,9 @@ export const createInstituteTeacherTable = async (instituteNumber) => {
             salary VARCHAR(100),
             teacherPhoto VARCHAR(255),
             teacherPassword VARCHAR(255),
-            courseId VARCHAR(100),
+            courseId VARCHAR(36),
             createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-        
-        
-            
                     )`;
         await sequelize.query(query, {
             type: QueryTypes.CREATE,
@@ -126,15 +118,14 @@ export const createInstituteTeacherTable = async (instituteNumber) => {
     }
 };
 
-export const createInstituteCourseTable = async (instituteNumber) => {
+export const createCourseTable = async (instituteNumber) => {
     const query = `
-    CREATE TABLE IF NOT EXISTS courses_${instituteNumber}(
+    CREATE TABLE IF NOT EXISTS course_${instituteNumber}(
       id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
       courseName VARCHAR(255) NOT NULL UNIQUE,
       coursePrice VARCHAR(255) NOT NULL,
       courseDuration VARCHAR(100) NOT NULL,
       courseLevel ENUM('beginner','intermediate','advance') NOT NULL,
-      courseThumbnail VARCHAR(200),
       courseDescription TEXT,
       teacherId VARCHAR(36),
       categoryId VARCHAR(36) NOT NULL,
@@ -147,7 +138,7 @@ export const createInstituteCourseTable = async (instituteNumber) => {
     });
 };
 
-export const createInstituteChapterTable = async (instituteNumber) => {
+export const createChapterTable = async (instituteNumber) => {
     const query = `
     CREATE TABLE IF NOT EXISTS course_chapter_${instituteNumber}(
         id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
@@ -156,10 +147,30 @@ export const createInstituteChapterTable = async (instituteNumber) => {
         chapterLevel ENUM('beginner','intermediate','advance') NOT NULL,
         courseId VARCHAR(36) NOT NULL,
         createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    )`
-}
-export const createInstituteStudentTable = async (instituteNumber) => {
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )`;
+    await sequelize.query(query,{
+        type: QueryTypes.CREATE,
+    })
+};
+export const createLessonTable = async (instituteNumber) => {
+    const query = `
+    CREATE TABLE IF NOT EXISTS chapter_lesson_${instituteNumber}(
+        id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
+        lessonName VARCHAR(255) NOT NULL,
+        lessonDescription TEXT,
+        lessonVideoUrl VARCHAR(255),
+        lessonThumbnail VARCHAR(255),
+        chapterId VARCHAR(36) NOT NULL,
+        createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+    `;
+    await sequelize.query(query, {
+        type: QueryTypes.CREATE,
+    });
+};
+export const createStudentTable = async (instituteNumber) => {
     try {
         const query = `
         CREATE TABLE IF NOT EXISTS student_${instituteNumber}(
@@ -181,3 +192,4 @@ export const createInstituteStudentTable = async (instituteNumber) => {
         console.log(error);
     }
 };
+

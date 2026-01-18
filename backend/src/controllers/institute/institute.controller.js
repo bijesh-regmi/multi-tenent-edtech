@@ -2,19 +2,20 @@ import asyncHandler from "../../utils/asyncHandler.js";
 import ApiResponse from "../../utils/ApiResponse.js";
 import ApiError from "../../utils/ApiError.js";
 import User from "../../models/user.model.js";
-import sequelize from "../../config/database.js";
 import {
     createInstituteTable,
     createUserInstituteTable,
-    createInstituteCategoryTable,
-    createInstituteTeacherTable,
-    createInstituteChapterTable,
-    createInstituteStudentTable,
-    createInstituteCourseTable,
+    createCategoryTable,
+    createTeacherTable,
+    createChapterTable,
+    createStudentTable,
+    createCourseTable,
+    createLessonTable,
 } from "../../services/createInstituteTables.js";
+import createRelationship from "../../services/alterInstituteTables.js";
 
-/* ================= INSTITUTE ================= */
-export const createInstitute = async (req, res, next) => {
+/*1 ================= INSTITUTE ================= */
+export const createInstitute = asyncHandler(async (req, res, next) => {
     const {
         instituteName,
         instituteEmail,
@@ -57,50 +58,52 @@ export const createInstitute = async (req, res, next) => {
         },
     );
 
-    req.currentInstituteNumber = instituteNumber;
+    req.instituteNumber = instituteNumber;
     next();
-};
-
-/* ================= CATEGORY ================= */
-export const createInstituteCategory = async (req, res, next) => {
+});
+/*2 ================= CATEGORY ================= */
+export const createInstituteCategory = asyncHandler(async (req, res, next) => {
     const { instituteNumber } = req;
-    await createInstituteCategoryTable(instituteNumber);
+    await createCategoryTable(instituteNumber);
     next();
-};
+});
 
-
-/* ================= TEACHER ================= */
-export const createInstituteTeacher = async (req, res, next) => {
+/*3 ================= TEACHER ================= */
+export const createInstituteTeacher = asyncHandler(async (req, res, next) => {
     const { instituteNumber } = req;
-    await createInstituteTeacherTable(instituteNumber);
+    await createTeacherTable(instituteNumber);
     next();
-};
+});
 
-
-/* ================= COURSE ================= */
-export const createInstituteCourse = async (req, res, next) => {
+/*4 ================= COURSE ================= */
+export const createInstituteCourse = asyncHandler(async (req, res, next) => {
     const { instituteNumber } = req;
-    await createInstituteCourseTable(instituteNumber);
+    await createCourseTable(instituteNumber);
     next();
-};
+});
 
-/* ================= COURSE CHAPTER ================= */
-export const createInstituteChapter = async (req, res, next) => {
+/*5 ================= COURSE CHAPTER ================= */
+export const createInstituteChapter = asyncHandler(async (req, res, next) => {
     const { instituteNumber } = req;
-    await createInstituteChapterTable(instituteNumber);
+    await createChapterTable(instituteNumber);
     next();
-};
+});
 
-/* ================= CHAPTER LESSON ================= */
-export const createInstituteLesson = async (req, res, next) => {
+/*6 ================= CHAPTER LESSON ================= */
+export const createChapterLesson = asyncHandler(async (req, res, next) => {
     const { instituteNumber } = req;
-    await createInstituteTeacherTable(instituteNumber);
+    await createLessonTable(instituteNumber);
     next();
-};
+});
 
-/* ================= STUDENT ================= */
-export const createInstituteStudent = async (req, res, next) => {
+/*7 ================= STUDENT ================= */
+export const createInstituteStudent = asyncHandler(async (req, res, next) => {
     const { instituteNumber } = req;
-    await createInstituteStudentTable(instituteNumber);
+    await createStudentTable(instituteNumber);
     next();
-};
+});
+export const establishRelationship = asyncHandler(async (req, res, next) => {
+    const { instituteNumber } = req;
+    await createRelationship(instituteNumber);
+     return res.status(201).json(new ApiResponse(201,{}, "Institute created successfully"));
+});
