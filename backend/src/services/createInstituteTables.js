@@ -82,7 +82,7 @@ export const createCategoryTable = async (instituteNumber) => {
     const query = `
       CREATE TABLE IF NOT EXISTS category_${instituteNumber} (
       id VARCHAR(36) PRIMARY KEY DEFAULT (UUID()),
-      categoryName VARCHAR(100) NOT NULL,
+      categoryName VARCHAR(100) NOT NULL UNIQUE,
       categoryDescription TEXT,
       createdAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
       updatedAt TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
